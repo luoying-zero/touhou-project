@@ -98,7 +98,57 @@ createApp({
             return array;
         };
 
-        const drawRadarChart = (scores) => { /* 这里保留上一版雷达图的绘制逻辑代码 */ };
+
+        // ========== 雷达图绘制逻辑 (Chart.js) ==========
+        const drawRadarChart = (scores) => {
+            const canvas = document.getElementById('radarChart');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            // 将真实的原始得分映射到 0-100 用于雷达图展示
+            // 假设单维度最高分为20，最低分为-20，映射公式为：((得分 + 20) / 40) * 100
+            const mapScore = (val) => Math.max(0, Math.min(100, ((val + 20) / 40) * 100));
+
+            new Chart(ctx, {
+                type: 'radar',
+                data: {
+                    labels: ['商业现实(B)', '集权效率(A)', '联合开放(U)', '硬核企划(H)', '反叛革新(R)', '事业爆肝(W)'],
+                    datasets: [{
+                        label: '能力倾向',
+                        data: [
+                            mapScore(scores.BD), 
+                            mapScore(scores.AC), 
+                            mapScore(scores.UI), 
+                            mapScore(scores.HE), 
+                            mapScore(scores.RT), 
+                            mapScore(scores.WP)
+                        ],
+                        backgroundColor: 'rgba(220, 38, 38, 0.2)', // 红色半透明填充
+                        borderColor: 'rgba(220, 38, 38, 1)', // 红色边框
+                        pointBackgroundColor: 'rgba(220, 38, 38, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(220, 38, 38, 1)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
+                            grid: { color: 'rgba(0, 0, 0, 0.1)' },
+                            pointLabels: { 
+                                font: { size: 12, family: 'sans-serif', weight: 'bold' }, 
+                                color: '#374151' 
+                            },
+                            ticks: { display: false, min: 0, max: 100 } // 隐藏具体的刻度数字，保持美观
+                        }
+                    },
+                    plugins: { 
+                        legend: { display: false } // 隐藏顶部图例
+                    }
+                }
+            });
+        };
 
         const submitData = async () => {
             isSubmitting.value = true;
