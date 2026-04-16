@@ -11,6 +11,7 @@ createApp({
         const finalResultCode = ref(''); 
         const matchedCharacter = ref({}); 
         const isNeutral = ref(false); 
+        const isDownloading = ref(false);
 
         // 学术调查问卷的数据绑定
         const userInfo = ref({
@@ -22,7 +23,7 @@ createApp({
             isStable: '',
             audience: '',
             phone: '',
-            skipped: false // 标记该用户是否跳过了问卷
+            skipped: false
         });
 
         const options = [
@@ -57,24 +58,41 @@ createApp({
                    userInfo.value.audience !== '';
         });
 
-        // 进入填表页
+        // 核心跳转逻辑修正
         const startSurvey = () => { 
             step.value = 'pre_survey'; 
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // 直接跳过表单，进入测试
         const skipSurvey = () => {
-            userInfo.value.skipped = true; // 打上标记
+            userInfo.value.skipped = true; 
             step.value = 'testing';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
-        // 填完表单后进入测试
         const startMainTest = () => {
             if (!isUserInfoComplete.value) return;
             userInfo.value.skipped = false;
             step.value = 'testing';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // 重新回到首页测试
+        const restartTest = () => {
+            // 重置所有状态
+            currentIndex.value = 0;
+            answers.value = [];
+            finalResultCode.value = '';
+            matchedCharacter.value = {};
+            isNeutral.value = false;
+            
+            // 为了让用户每次做题感觉不一样，这里使用完全随机打乱
+            questions.value = seededShuffle([...questions.value], Math.random() * 10000);
+            
+            // 如果希望保留用户的基本信息，不重置userInfo
+            // 如果希望彻底重置，可以把 userInfo 的字段全清空
+            
+            step.value = 'start';
             window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
@@ -179,9 +197,33 @@ createApp({
             });
         };
 
+        // 新增功能：一键将结果卡片生成图片并下载
+        const downloadResult = async () => {
+            isDownloading.value = true;
+            try {
+                const element = document.getElementById('result-card');
+                const canvas = await html2canvas(element, {
+                    scale: 2, // 提高清晰度
+                    useCORS: true, // 允许跨域加载角色图片
+                    backgroundColor: '#f9fafb'
+                });
+                
+                // 将画布转换为图片并触发下载
+                const link = document.createElement('a');
+                link.download = `车万例会成分测试_${matchedCharacter.value.name}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.error("生成图片失败", err);
+                alert("生成图片失败，请尝试直接截图分享！");
+            } finally {
+                isDownloading.value = false;
+            }
+        };
+
         const silentUploadData = () => {
             const combinedData = {
-                researchInfo: userInfo.value, // 如果用户跳过了，这里的数据会是空的，并且 skipped: true
+                researchInfo: userInfo.value, 
                 testAnswers: answers.value
             };
 
@@ -208,8 +250,9 @@ createApp({
         return { 
             step, questions, currentIndex, currentQuestion, options, 
             finalResultCode, isNeutral, matchedCharacter, 
-            userInfo, isUserInfoComplete,
-            startSurvey, skipSurvey, startMainTest, selectOption, prevQuestion
+            userInfo, isUserInfoComplete, isDownloading,
+            startSurvey, skipSurvey, startMainTest, selectOption, prevQuestion,
+            restartTest, downloadResult
         };
     }
 }).mount('#app');
