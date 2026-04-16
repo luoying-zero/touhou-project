@@ -108,16 +108,15 @@
                     </p>
                 </div>
 
-                <!-- 提交按钮区 -->
-                <div class="text-center border-t border-gray-200 pt-6">
-                    <button @click="submitData" :disabled="isSubmitting || isSubmitted" 
-                            :class="isSubmitted ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'"
-                            class="text-white px-8 py-3 rounded-xl font-bold transition shadow-lg w-full md:w-auto">
-                        {{ submitBtnText }}
-                    </button>
-                    <p v-if="submitMessage" class="mt-3 text-sm font-medium" :class="isSubmitted ? 'text-green-600' : 'text-gray-500'">
-                        {{ submitMessage }}
+                <!-- 底部交互区：引导截图与重测 -->
+                <div class="text-center border-t border-gray-200 pt-8 pb-4">
+                    <p class="text-gray-500 font-medium mb-5 text-sm tracking-widest">
+                        ▼ 长按保存测试结果，分享给群友 ▼
                     </p>
+                    <button @click="restartTest" 
+                            class="bg-gray-800 hover:bg-black text-white px-8 py-3 rounded-xl font-bold transition shadow-lg w-full md:w-auto">
+                        再测一次
+                    </button>
                 </div>
             </div>
         </div>

@@ -2,7 +2,6 @@ const { createApp, ref, computed, onMounted, nextTick } = Vue;
 
 createApp({
     setup() {
-        // ========== 状态变量 ==========
         const step = ref('start'); 
         const questions = ref([]); 
         const charactersData = ref({}); 
@@ -12,10 +11,6 @@ createApp({
         const finalResultCode = ref(''); 
         const matchedCharacter = ref({}); 
         const isNeutral = ref(false); 
-        
-        const isSubmitting = ref(false); 
-        const isSubmitted = ref(false); 
-        const submitMessage = ref(''); 
 
         const options = [
             { label: "非常符合", value: 2 },
@@ -25,7 +20,6 @@ createApp({
             { label: "非常不符合", value: -2 }
         ];
 
-        // ========== 初始化：异步加载 JSON 数据 ==========
         onMounted(async () => {
             try {
                 const qRes = await fetch('./data/questions.json');
@@ -40,13 +34,6 @@ createApp({
         });
 
         const currentQuestion = computed(() => questions.value[currentIndex.value]);
-        
-        // 修改了按钮的文案逻辑，适应“自动上传”的语境
-        const submitBtnText = computed(() => {
-            if (isSubmitting.value) return '正在自动生成并同步档案...';
-            if (isSubmitted.value) return '档案已永久记录于幻想乡！';
-            return '档案同步失败，点击重试';
-        });
 
         const startTest = () => { 
             step.value = 'testing'; 
@@ -71,7 +58,6 @@ createApp({
             if (currentIndex.value > 0) currentIndex.value--; 
         };
 
-        // ========== 核心算分与匹配逻辑 ==========
         const calculateResult = () => {
             let dimScores = { BD: 0, AC: 0, UI: 0, HE: 0, RT: 0, WP: 0 };
             
@@ -105,8 +91,19 @@ createApp({
                 drawRadarChart(dimScores); 
             });
 
-            // 【新增】：计算完结果后，自动触发上传函数！
-            submitData();
+            // 结果算完后，发起静默上传
+            silentUploadData();
+        };
+
+        // 新增功能：再测一次
+        const restartTest = () => {
+            answers.value = [];
+            currentIndex.value = 0;
+            // 重新打乱题目顺序，让每次体验稍微不一样
+            questions.value = seededShuffle([...questions.value], Math.random() * 100000);
+            step.value = 'testing';
+            // 滚动到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         };
 
         const seededShuffle = (array, seed = 114514) => {
@@ -125,7 +122,6 @@ createApp({
             const canvas = document.getElementById('radarChart');
             if (!canvas) return;
             const ctx = canvas.getContext('2d');
-            
             const mapScore = (val) => Math.max(0, Math.min(100, ((val + 20) / 40) * 100));
 
             new Chart(ctx, {
@@ -133,7 +129,7 @@ createApp({
                 data: {
                     labels: ['商业现实(B)', '集权效率(A)', '联合开放(U)', '硬核企划(H)', '反叛革新(R)', '事业爆肝(W)'],
                     datasets: [{
-                        label: '能力倾向',
+                        label: '倾向',
                         data: [
                             mapScore(scores.BD), mapScore(scores.AC), mapScore(scores.UI), 
                             mapScore(scores.HE), mapScore(scores.RT), mapScore(scores.WP)
@@ -141,9 +137,7 @@ createApp({
                         backgroundColor: 'rgba(220, 38, 38, 0.2)',
                         borderColor: 'rgba(220, 38, 38, 1)',
                         pointBackgroundColor: 'rgba(220, 38, 38, 1)',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: 'rgba(220, 38, 38, 1)'
+                        pointBorderColor: '#fff'
                     }]
                 },
                 options: {
@@ -160,52 +154,34 @@ createApp({
             });
         };
 
-        // ========== 数据提交到阿里云后台 ==========
-        const submitData = async () => {
-            // 如果已经提交成功了，就不再重复提交
-            if (isSubmitted.value) return;
-
-            isSubmitting.value = true;
-            submitMessage.value = "";
-            
-            // 【重点更新】：加上了 answers 字段，将完整的答题明细转为字符串保存
+        // ========== 核心：无感静默上传 ==========
+        const silentUploadData = () => {
             const payload = {
                 result: finalResultCode.value,
-                character: matchedCharacter.value.name || "未知角色",
+                character: matchedCharacter.value.name || "未知",
                 isNeutral: isNeutral.value ? 'true' : 'false',
                 submitTime: new Date().toISOString(),
                 answers: JSON.stringify(answers.value) 
             };
 
-            // 【注意】：请务必将下面替换为你自己的阿里云函数地址！！
-            const WEBHOOK_URL = "https://savesurvey-wdzwrthfoe.cn-hangzhou.fcapp.run";
+            // 【务必填写你的阿里云函数公网地址】
+            const WEBHOOK_URL = "https://save-survey-xxxxxx.cn-hangzhou.fcapp.run";
 
-            try {
-                const response = await fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                
-                if (response.ok) {
-                    submitMessage.value = "";
-                    isSubmitted.value = true;
-                } else {
-                    submitMessage.value = "上传遇到阻碍，由于网络原因未能存档。";
-                    isSubmitting.value = false;
-                }
-            } catch (error) {
-                console.error(error);
-                submitMessage.value = "网络错误，由于结界原因未能存档。";
-                isSubmitting.value = false;
-            }
+            // Fire and forget: 发出请求即可，不等待结果，不处理报错，不在界面显示
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(e => {
+                // 如果用户网不好断了，后台报错就行，用户界面依然正常显示结果，体验完全不受影响
+                console.log("Analytics sync failed, but it's okay.");
+            });
         };
 
         return { 
             step, questions, currentIndex, currentQuestion, options, 
             finalResultCode, isNeutral, matchedCharacter, 
-            startTest, selectOption, prevQuestion, 
-            submitData, isSubmitting, isSubmitted, submitMessage, submitBtnText 
+            startTest, selectOption, prevQuestion, restartTest
         };
     }
 }).mount('#app');
