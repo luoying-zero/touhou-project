@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>测一测你办车万例会像哪一个角色？</title>
+    <title>测一测你办车万例会像哪一个车万角色？</title>
     <!-- 引入 Vue 和 Tailwind -->
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -28,19 +28,19 @@
 
         <!-- 首页：测试介绍 & 知情同意书 -->
         <div v-else-if="step === 'start'" class="p-6 md:p-8">
-            <h1 class="text-3xl font-black mb-6 text-center tracking-wide">测一测你办车万例会<br><span class="text-red-600">像哪一个角色？</span></h1>
+            <h1 class="text-3xl font-black mb-6 text-center tracking-wide">测一测你办车万例会<br><span class="text-red-600">像哪一个车万角色？</span></h1>
             
             <div class="mb-6 text-gray-700 leading-relaxed">
                 <h3 class="font-bold text-lg mb-2 flex items-center"><span class="mr-2">💡</span>测试说明</h3>
-                <p class="text-sm">本测试共60题，涵盖资金、管理、外交、内容等六大维度。请根据你在高校东方例会中的真实想法进行选择。测试结束后，将为你生成专属的<strong>例会角色面板</strong>与<strong>能力雷达图</strong>。</p>
+                <p class="text-sm">本测试共60题，涵盖了现实中举办高校例会时遇到的方方面面的问题。请根据你在高校东方例会中的真实想法进行选择。测试结束后，将为你生成一份专属的<strong>例会角色面板</strong>与<strong>六维雷达图</strong>。</p>
             </div>
 
             <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 mb-8 text-sm text-gray-600 leading-relaxed shadow-inner">
                 <h3 class="font-bold text-gray-800 mb-2 flex items-center">
                     <span class="text-lg mr-2">🧠</span> 科研知情说明
                 </h3>
-                <p class="mb-2">本测试同时用于一项关于“中国高校东方Project同人社群与例会组织模式”的学术科研研究。</p>
-                <p>参与完全自愿，数据将以匿名形式分析。您可以选择留下您的例会履历深度助力研究（并参与抽奖），也可以选择直接跳过，仅体验趣味角色测试。</p>
+                <p class="mb-2">本测试同时用于一项关于“高校东方Project同人社群与例会组织模式”的学术科研研究。</p>
+                <p>参与完全自愿，数据将以匿名形式分析。您可以选择留下您的例会履历深度助力研究（并参与现金抽奖），也可以选择直接跳过，仅体验趣味角色测试。</p>
             </div>
 
             <div class="flex flex-col space-y-3">
@@ -68,7 +68,7 @@
                 
                 <div class="bg-yellow-50 p-5 rounded-xl border border-yellow-200 mt-8">
                     <h3 class="font-bold text-yellow-800 mb-2 flex items-center"><span class="text-lg mr-1">🎁</span> 感谢助力，参与抽奖</h3>
-                    <p class="text-xs text-yellow-700 mb-3">奖池配置：50 元 × 4名。<br>说明：请留下手机号（仅用于中奖后发放）。数据严格匿名处理。</p>
+                    <p class="text-xs text-yellow-700 mb-3">奖池配置：50 元 × 2名。<br>说明：请留下手机号（仅用于中奖后发放）。数据严格匿名处理。</p>
                     <input type="tel" v-model="userInfo.phone" placeholder="选填：您的联系手机号" class="w-full border border-yellow-300 px-4 py-2 rounded-lg focus:ring-2 focus:ring-yellow-500 outline-none bg-white">
                 </div>
             </div>
