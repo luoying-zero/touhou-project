@@ -107,8 +107,20 @@
 
         <!-- 结果页 -->
         <div v-if="step === 'result'" class="bg-gray-50">
+            
+            <!-- 💡 核心改动：把生成海报的按钮移到最上方 -->
+            <div class="px-6 md:px-8 pt-6 pb-2 max-w-sm mx-auto flex flex-col items-center">
+                <button @click="downloadResult" :disabled="isDownloading" class="bg-green-600 text-white px-8 py-3.5 rounded-xl font-bold text-lg hover:bg-green-700 transition shadow-lg shadow-green-200/50 w-full flex justify-center items-center">
+                    <span v-if="isDownloading" class="animate-pulse">🖼️ 正在生成高清海报...</span>
+                    <span v-else>💾 保存专属测试海报</span>
+                </button>
+                <p class="text-xs text-gray-400 mt-3 flex items-center tracking-widest font-bold">
+                    <span class="animate-bounce mr-1">👇</span> 下滑查看详细解读 <span class="animate-bounce ml-1">👇</span>
+                </p>
+            </div>
+
             <!-- 【核心保存区域】id为result-card，用于一键截图 -->
-            <div id="result-card" class="bg-gray-50 pb-3" style="max-width: 420px; margin: 0 auto;">
+            <div id="result-card" class="bg-gray-50 pb-3 mt-1" style="max-width: 420px; margin: 0 auto;">
                 <div class="bg-gradient-to-br from-red-600 to-red-900 text-white p-5 text-center relative overflow-hidden">
                     <div class="text-red-200 font-bold tracking-widest text-xs mb-3">你的例会组织风格代码：{{ finalResultCode }}</div>
                     
@@ -123,7 +135,7 @@
                 </div>
 
                 <div class="px-4 pt-4">
-                    <!-- 新增的雷达图标题 -->
+                    <!-- 雷达图标题 -->
                     <div class="text-center mb-1">
                         <h4 class="text-sm font-bold text-gray-700 flex items-center justify-center tracking-widest">
                             <span class="text-red-600 mr-2 text-xs">◆</span> 
@@ -157,13 +169,9 @@
                 </div>
             </div>
 
-            <!-- 操作按钮区域 (不会被截图进去) -->
-            <div class="px-6 md:px-8 pb-8 mt-2 flex flex-col space-y-4">
-                <button @click="downloadResult" :disabled="isDownloading" class="bg-green-600 text-white px-8 py-4 rounded-xl font-bold hover:bg-green-700 transition shadow-lg w-full flex justify-center items-center">
-                    <span v-if="isDownloading">🖼️ 正在为您生成高清海报...</span>
-                    <span v-else>🖼️ 生成我的专属测试海报</span>
-                </button>
-                <button @click="restartTest" class="bg-gray-200 text-gray-700 px-8 py-3 rounded-xl font-bold hover:bg-gray-300 transition w-full text-center">
+            <!-- 💡 底部保留“再测一次”按钮 -->
+            <div class="px-6 md:px-8 pb-8 mt-4 flex flex-col">
+                <button @click="restartTest" class="bg-gray-200 text-gray-700 px-8 py-3.5 rounded-xl font-bold hover:bg-gray-300 transition w-full text-center">
                     🏠 回到首页，再测一次
                 </button>
             </div>
