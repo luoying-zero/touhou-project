@@ -136,11 +136,11 @@ createApp({
             finalResultCode.value = resultCode;
             isNeutral.value = zeroCount >= 4;
 
-            if (isNeutral.value) {
-                matchedCharacter.value = charactersData.value["NEUTRAL"];
-            } else {
-                matchedCharacter.value = charactersData.value[resultCode] || charactersData.value["DEFAULT"];
-            }
+            finalResultCode.value = "NEUTRAL"; 
+            isNeutral.value = true; // 强制不为中立
+
+            // 强制将匹配角色赋值为 JSON 数据中的 "DEFAULT"
+            matchedCharacter.value = charactersData.value["NEUTRAL"];
 
             step.value = 'result';
             window.scrollTo({ top: 0, behavior: 'smooth' });
