@@ -59,16 +59,16 @@ createApp({
                    userInfo.value.audience !== '';
         });
 
-        // 核心跳转逻辑修正
         const startSurvey = () => { 
-            step.value = 'pre_survey'; 
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // 强制清空答案（所有维度得分为0）
+            answers.value = []; 
+            // 直接跳过测试，调用结果计算逻辑
+            calculateResult();
         };
-
         const skipSurvey = () => {
             userInfo.value.skipped = true; 
-            step.value = 'testing';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            answers.value = []; // 清空答案
+            calculateResult();  // 直接生成结果
         };
 
         const startMainTest = () => {
@@ -136,11 +136,11 @@ createApp({
             finalResultCode.value = resultCode;
             isNeutral.value = zeroCount >= 4;
 
-            finalResultCode.value = "NEUTRAL"; 
-            isNeutral.value = true; // 强制不为中立
-
-            // 强制将匹配角色赋值为 JSON 数据中的 "DEFAULT"
-            matchedCharacter.value = charactersData.value["NEUTRAL"];
+            if (isNeutral.value) {
+                matchedCharacter.value = charactersData.value["NEUTRAL"];
+            } else {
+                matchedCharacter.value = charactersData.value[resultCode] || charactersData.value["DEFAULT"];
+            }
 
             step.value = 'result';
             window.scrollTo({ top: 0, behavior: 'smooth' });
